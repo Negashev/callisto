@@ -1,0 +1,14 @@
+apiVersion: skaffold/v4beta2
+kind: Config
+metadata:
+  name: callisto
+build:
+  artifacts:
+  - image: negash/callisto
+    context: .
+    docker: {}
+  local:
+    push: false
+manifests:
+  rawYaml:
+  - callisto.yaml

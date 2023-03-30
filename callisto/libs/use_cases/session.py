@@ -41,7 +41,7 @@ class SessionUseCase:
 
     async def create_session(self, session_request: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
         with record_stage_stats(self.state_service, SessionStage.CREATING):
-            pod_name = await self._run_pod()
+            pod_name = await self._run_pod(session_request)
             with record_step_stats(self.state_service, SessionStageStep.GETTING_POD):
                 pod = await self.k8s_service.get_pod(pod_name)
             pod_ip = self.k8s_service.get_pod_ip(pod)
@@ -89,9 +89,15 @@ class SessionUseCase:
             except SessionNotFound as e:
                 logger.warning(e)
 
-    async def _run_pod(self) -> str:
+    async def _run_pod(self, session_request) -> str:
         logger.debug('creating pod')
         with record_step_stats(self.state_service, SessionStageStep.CREATING_POD):
+            if 'browserVersion' in session_request['desiredCapabilities']:
+                browserName = session_request['desiredCapabilities']['browserName']
+                browserVersion = session_request['desiredCapabilities']['browserVersion']
+                if not browserVersion.endswith('.0'):
+                    browserVersion += '.0'
+                self.pod_config.manifest['spec']['containers'][0]['image'] = 'selenoid/vnc:' + browserName + '_' + browserVersion
             pod = await self.k8s_service.create_pod(spec=self.pod_config.manifest)
         pod_name = self.k8s_service.get_pod_name(pod)
         logger.debug('pod created', extra=l_ctx(pod=pod_name))

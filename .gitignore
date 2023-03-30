@@ -61,3 +61,4 @@ config/
 .venv/
 _debug
 .mypy_cache
+venv

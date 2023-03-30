@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    meta.helm.sh/release-name: callisto
+    meta.helm.sh/release-namespace: default
+  labels:
+    app: callisto
+    app.kubernetes.io/managed-by: Helm
+    chart: callisto-1.5.0
+    heritage: Helm
+    release: callisto
+  name: callisto
+  namespace: default
+spec:
+  minReadySeconds: 15
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: callisto
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: callisto
+        instance_id: unknown
+        release: callisto
+    spec:
+      affinity: {}
+      containers:
+        - env:
+            - name: POD_IMAGE
+              value: selenoid/vnc:chrome_80.0
+            - name: K8S_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: LOG_LEVEL
+              value: DEBUG
+            - name: GRAYLOG_HOST
+            - name: INSTANCE_ID
+              value: unknown
+            - name: SENTRY_DSN
+            - name: POD_MANIFEST
+              value: /etc/callisto/browser-pod-manifest.yaml
+          image: negash/callisto
+          imagePullPolicy: IfNotPresent
+          name: callisto
+          ports:
+            - containerPort: 8080
+              name: 8080tcp
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 128Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /etc/callisto
+              name: browser-pod-manifest
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: callisto
+      serviceAccountName: callisto
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - configMap:
+            defaultMode: 420
+            name: callisto-browser-pod-configmap
+          name: browser-pod-manifest
