@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "callisto"
-version = "1.0.2"
+version = "1.0.3"
 description = "A service to manage browser pods in k8s"
 authors = ["Wrike DevOps team <devops+oss@team.wrike.com>", "Negash <i@negash.ru>"]
 license = "MIT"
@@ -9,10 +9,10 @@ keywords = ['web', 'service', 'ci', 'automation']
 exclude = ["tests", "*.tests"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.10"
 aiohttp = "^3.5.4"
 aiodns = "^2.0.0"
-aiojobs = "^0.2.2"
+aiojobs = "^1.1.0"
 kubernetes_asyncio = "^10.0.1"
 typing-extensions = "^3.7.4"
 Click = "^7.0"
